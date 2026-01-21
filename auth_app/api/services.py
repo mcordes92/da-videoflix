@@ -4,6 +4,8 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from urllib.parse import urlencode
 
+from ..models import UserDataModel
+
 
 def send_welcome_email(to_email: str, token: str, uidb64: str) -> None:
     subject = "Confirm your email"
@@ -40,3 +42,27 @@ def send_welcome_email(to_email: str, token: str, uidb64: str) -> None:
         html_message=html,
         fail_silently=False,
     )
+
+def active_account(uidb64, token: str) -> str:
+    if not uidb64 or not token:
+        raise ValueError("uidb64 or token is missing.")
+    
+    try:
+        user_data = UserDataModel.objects.select_related('user').get(uidb64=uidb64, token=token)
+    except UserDataModel.DoesNotExist:
+        raise ValueError("Invalid uidb64 or token.")
+    
+    user =  user_data.user
+
+    if user.is_active:
+        return "Account is already activated."
+    
+    if user_data.token != token:
+        raise ValueError("Invalid activation token.")
+    
+    user.is_active = True
+    user.save(update_fields=['is_active'])
+
+    UserDataModel.delete(user_data)
+
+    return "Account successfully activated."

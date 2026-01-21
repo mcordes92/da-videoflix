@@ -50,3 +50,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         user_data.save()
 
         return account
+    
+class ActivationResponseSerializer(serializers.Serializer):
+    """Serializer for account activation response."""
+    message = serializers.CharField()

@@ -5,9 +5,9 @@ from django_rq import enqueue
 from django.contrib.auth.models import User
 from rest_framework import status, views, permissions, response
 
-from .serializers import RegistrationSerializer
+from .serializers import RegistrationSerializer, ActivationResponseSerializer
 
-from .services import send_welcome_email
+from .services import send_welcome_email, active_account
 
 
 class RegistrationView(views.APIView):
@@ -33,3 +33,14 @@ class RegistrationView(views.APIView):
                 "token": instance.userdatamodel.token
                 }, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ActivationView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, uidb64, token):
+        try:
+            msg = active_account(uidb64=uidb64, token=token)
+            data = {"message": msg}
+            return response.Response(data, status=status.HTTP_200_OK)
+        except Exception:
+            return response.Response({"message": "Activation failed."}, status=status.HTTP_400_BAD_REQUEST)
