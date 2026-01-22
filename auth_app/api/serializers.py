@@ -2,10 +2,11 @@
 import uuid, secrets
 
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 
 from rest_framework import serializers
 
-from auth_app.models import UserDataModel
+from auth_app.models import UserTokenModel
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializer for user registration with password confirmation."""
@@ -46,7 +47,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         account.is_active = False
         account.save()
 
-        user_data = UserDataModel(user=account, token=secrets.token_urlsafe(20))
+        user_data = UserTokenModel(user=account, token=secrets.token_urlsafe(20))
         user_data.save()
 
         return account
@@ -54,3 +55,24 @@ class RegistrationSerializer(serializers.ModelSerializer):
 class ActivationResponseSerializer(serializers.Serializer):
     """Serializer for account activation response."""
     message = serializers.CharField()
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        user = authenticate(username=email, password=password)
+
+        if not user:
+            raise serializers.ValidationError({"detail": "Invalid credentials."})
+        
+        if not user.is_active:
+            raise serializers.ValidationError({"detail": "Account is not activated."})
+        
+        attrs["user"] = user
+        return attrs
+    
