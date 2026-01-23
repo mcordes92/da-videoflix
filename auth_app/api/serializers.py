@@ -76,3 +76,16 @@ class LoginSerializer(serializers.Serializer):
         attrs["user"] = user
         return attrs
     
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.CharField()
+    confirm_password = serializers.CharField()
+
+    def validate(self, data):
+        if data["new_password"] != data["confirm_password"]:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
+    
+    

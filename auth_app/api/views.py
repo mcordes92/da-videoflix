@@ -6,9 +6,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from rest_framework import status, views, permissions, response
 
-from .serializers import RegistrationSerializer, ActivationResponseSerializer, LoginSerializer
+from .serializers import RegistrationSerializer, ActivationResponseSerializer, LoginSerializer, PasswordResetConfirmSerializer, PasswordResetSerializer
 
-from .services import send_welcome_email, active_account, create_jwt_tokens, set_auth_cookies, clear_auth_cookies, blacklist_refresh_token, create_access_token_from_refresh, set_access_token
+from .services import active_account, create_jwt_tokens, set_auth_cookies, clear_auth_cookies, blacklist_refresh_token, create_access_token_from_refresh, set_access_token, create_password_reset, confirm_password_reset
+from .tasks import send_welcome_email
 
 
 class RegistrationView(views.APIView):
@@ -118,3 +119,47 @@ class TokenRefreshView(views.APIView):
 
         set_access_token(res, new_access)
         return res
+    
+class PasswordResetView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email']
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return response.Response(
+                {"detail": "An email has been sent to reset your password."},
+                status=status.HTTP_200_OK
+            )
+        
+        create_password_reset(user)
+
+        return response.Response(
+            {"detail": "An email has been sent to reset your password."},
+            status=status.HTTP_200_OK
+        )
+    
+class PasswordResetConfirmView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, uidb64, token):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            confirm_password_reset(uidb64, token, serializer.validated_data['new_password'])
+        except Exception:
+            return response.Response(
+                {"detail": "Invalid or expired token."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        return response.Response(
+            {"detail": "Your Password has been successfully reset."}, 
+            status=status.HTTP_200_OK
+        )
