@@ -39,6 +39,9 @@ else:
 EOF
 
 python manage.py rqworker default &
+python manage.py rqworker default &
+python manage.py rqworker default &
+python manage.py rqworker default &
 python manage.py rqworker high &
 
-exec gunicorn core.wsgi:application --bind 0.0.0.0:8000 --reload
+exec gunicorn core.wsgi:application --bind 0.0.0.0:8000 --reload --timeout 120 --graceful-timeout 120
