@@ -3,11 +3,12 @@ import os, subprocess, django_rq
 from pathlib import Path
 
 from django.conf import settings
+from django.core.files import File
+
 from ..models import Video
 
 
 HLS_VARIANTS = [
-    {"name": "360p", "height": 360, "v_bitrate": "800k", "maxrate": "856k", "bufsize": "1200k", "bandwidth": 900000},
     {"name": "480p", "height": 480, "v_bitrate": "1400k", "maxrate": "1498k", "bufsize": "2100k", "bandwidth": 1600000},
     {"name": "720p", "height": 720, "v_bitrate": "2800k", "maxrate": "2996k", "bufsize": "4200k", "bandwidth": 3200000},
     {"name": "1080p", "height": 1080, "v_bitrate": "5000k", "maxrate": "5350k", "bufsize": "7500k", "bandwidth": 5800000},
@@ -80,30 +81,23 @@ def transcode_variant_to_hls(
         "ffmpeg",
         "-y",
         "-i", str(input_path),
-        # Einfaches Scaling
         "-vf", f"scale=-2:{height}",
-        # Video-Codec - MINIMALE Einstellungen
         "-c:v", "libx264",
-        "-preset", "ultrafast",  # Schnellste Encoding
-        "-tune", "zerolatency",  # Niedrige Latenz
-        "-crf", "28",  # Höherer CRF = weniger CPU, kleinere Dateien
-        # Einfache Keyframe-Einstellungen
-        "-g", "150",  # Alle 6 Sekunden ein Keyframe (bei 25fps)
+        "-preset", "ultrafast",
+        "-tune", "zerolatency",
+        "-crf", "28", 
+        "-g", "150",
         "-keyint_min", "150",
         "-sc_threshold", "0",
-        # Bitrate (nur wenn nötig)
         "-maxrate", maxrate,
         "-bufsize", bufsize,
-        # Audio - einfach kopieren wenn möglich, sonst re-encoden
         "-c:a", "aac",
-        "-b:a", "96k",  # Niedrigere Audio-Bitrate
+        "-b:a", "96k",
         "-ac", "2",
-        # HLS
         "-hls_time", str(hls_time),
         "-hls_playlist_type", "vod",
         "-hls_segment_filename", str(segment_pattern),
-        # Performance
-        "-threads", "2",  # Limitiere Threads (weniger CPU-Last)
+        "-threads", "2",
         str(variant_playlist),
     ]
 
@@ -128,3 +122,29 @@ def run_ffmpeg(cmd: list):
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=os.environ.copy())
     if p.returncode != 0:
         raise RuntimeError(f"ffmpeg failed: (code {p.returncode}) {p.stderr}")
+    
+def generate_thumbnail_for_video(video: Video, input_path: Path):
+    if video.thumbnail:
+        return
+    
+    thumbnails_dir = Path(getattr(settings, 'MEDIA_ROOT')) / 'thumbnails'
+    thumbnails_dir.mkdir(parents=True, exist_ok=True)
+
+    thumb_filename = f"video_{video.id}.jpg"
+    thumb_abs_path = thumbnails_dir / thumb_filename
+
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-ss", "00:00:01",
+        "-i", str(input_path),
+        "-vframes", "1",
+        "-vf", "scale=640:-2",
+        "-q:v", "2",
+        str(thumb_abs_path)
+    ]
+
+    run_ffmpeg(cmd)
+
+    video.thumbnail.name = f'thumbnails/{thumb_filename}'
+    video.save(update_fields=['thumbnail'])

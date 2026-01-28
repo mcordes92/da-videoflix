@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 
 from ..models import Video
-from .tasks import process_video_to_hls
+from .tasks import process_video_to_hls, generate_thumbnail_for_video
 
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
@@ -16,6 +16,7 @@ def video_post_save(sender, instance, created, **kwargs):
 
         queue = django_rq.get_queue('default', autocommit=True)
         queue.enqueue(process_video_to_hls, video_id=instance.id)
+        queue.enqueue(generate_thumbnail_for_video, instance, instance.video_file.path)
 
 @receiver(post_delete, sender=Video)
 def delete_video(sender, instance, **kwargs):
