@@ -81,16 +81,27 @@ def clear_auth_cookies(res):
     secure = bool(getattr(settings, "AUTH_COOKIE_SECURE", False))
     samesite = getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax")
 
-    res.delete_cookie(
+    # Cookies müssen mit den gleichen Parametern gelöscht werden wie beim Setzen
+    res.set_cookie(
         access_cookie,
-        path="/",
-        samesite=samesite
+        value="",
+        max_age=0,
+        expires="Thu, 01 Jan 1970 00:00:00 GMT",
+        httponly=True,
+        secure=secure,
+        samesite=samesite,
+        path="/"
     )
 
-    res.delete_cookie(
+    res.set_cookie(
         refresh_cookie,
-        path="/",
-        samesite=samesite
+        value="",
+        max_age=0,
+        expires="Thu, 01 Jan 1970 00:00:00 GMT",
+        httponly=True,
+        secure=secure,
+        samesite=samesite,
+        path="/"
     )
 
     print(f"Cleared cookies: {access_cookie}, {refresh_cookie}")

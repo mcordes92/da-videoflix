@@ -78,16 +78,18 @@ class LogoutView(views.APIView):
         refresh_cookie = getattr(settings, "AUTH_REFRESH_COOKIE_NAME", "refresh_token")
         refresh_token = request.COOKIES.get(refresh_cookie)
 
-        if not refresh_token:
-            return response.Response({"detail": "Refresh token missing."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            blacklist_refresh_token(refresh_token)
-        except Exception:
-            pass
+        print("Logout requested. Refresh token:", refresh_token)
 
+        # Versuche refresh token zu blacklisten (wenn vorhanden)
+        if refresh_token:
+            try:
+                blacklist_refresh_token(refresh_token)
+            except Exception:
+                pass
+
+        # Lösche Cookies IMMER, auch wenn kein refresh_token vorhanden war
         res = response.Response(
-            {"detail": "Logout successful! All tokens will be deleted. Refresh token is now invalid."},
+            {"detail": "Logout successful! All tokens will be deleted."},
             status=status.HTTP_200_OK
         )
 
