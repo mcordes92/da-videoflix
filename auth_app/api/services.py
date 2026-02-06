@@ -40,8 +40,8 @@ def create_jwt_tokens(user):
 
 
 def set_auth_cookies(res, access_token: str, refresh_token: str):
-    access_cookie = getattr(settings, "ACCESS_TOKEN_COOKIE_NAME", "access_token")
-    refresh_cookie = getattr(settings, "REFRESH_TOKEN_COOKIE_NAME", "refresh_token")
+    access_cookie = getattr(settings, "AUTH_ACCESS_COOKIE_NAME", "access_token")
+    refresh_cookie = getattr(settings, "AUTH_REFRESH_COOKIE_NAME", "refresh_token")
 
     secure = bool(getattr(settings, "AUTH_COOKIE_SECURE", False))
     samesite = getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax")
@@ -69,12 +69,14 @@ def set_auth_cookies(res, access_token: str, refresh_token: str):
         path="/"
     )
 
+    print(f"Set cookies: {access_cookie} (max_age={access_max_age}), {refresh_cookie} (max_age={refresh_max_age})")
+
     return res
 
 
 def clear_auth_cookies(res):
-    access_cookie = getattr(settings, "ACCESS_TOKEN_COOKIE_NAME", "access_token")
-    refresh_cookie = getattr(settings, "REFRESH_TOKEN_COOKIE_NAME", "refresh_token")
+    access_cookie = getattr(settings, "AUTH_ACCESS_COOKIE_NAME", "access_token")
+    refresh_cookie = getattr(settings, "AUTH_REFRESH_COOKIE_NAME", "refresh_token")
 
     secure = bool(getattr(settings, "AUTH_COOKIE_SECURE", False))
     samesite = getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax")
@@ -91,6 +93,8 @@ def clear_auth_cookies(res):
         samesite=samesite
     )
 
+    print(f"Cleared cookies: {access_cookie}, {refresh_cookie}")
+
     return res
 
 
@@ -105,7 +109,7 @@ def create_access_token_from_refresh(refresh_token: str):
 
 
 def set_access_token(res, access_token: str):
-    access_cookie = getattr(settings, "ACCESS_TOKEN_COOKIE_NAME", "access_token")
+    access_cookie = getattr(settings, "AUTH_ACCESS_COOKIE_NAME", "access_token")
 
     secure = bool(getattr(settings, "AUTH_COOKIE_SECURE", False))
     samesite = getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax")
