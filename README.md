@@ -49,28 +49,9 @@ DA Videoflix is a backend API for a video streaming service, similar to popular 
 git clone <repository-url>
 cd da-videoflix
 ```
+#### 2. Environment Configuration
 
-#### 2. Create Virtual Environment
-
-```bash
-python -m venv venv
-
-# On Windows
-venv\Scripts\activate
-
-# On macOS/Linux
-source venv/bin/activate
-```
-
-#### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-#### 4. Environment Configuration
-
-Create a `.env` file in the project root:
+Create a `.env` file in the project root or copy the `.env.template`:
 
 ```env
 # Django
@@ -101,39 +82,11 @@ EMAIL_USE_TLS=True
 DEFAULT_FROM_EMAIL=your-email@gmail.com
 ```
 
-#### 5. Database Setup
-
-```bash
-# Run migrations
-python manage.py migrate
-
-# Create superuser
-python manage.py createsuperuser
-```
-
-#### 6. Start Development Server
-
-```bash
-# Start Django development server
-python manage.py runserver
-
-# In a separate terminal, start RQ worker for background tasks
-python manage.py rqworker high default
-```
-
-The API will be available at `http://localhost:8000/`
-
 ### Docker Setup
 
 ```bash
 # Build and start all services
 docker-compose up --build
-
-# Run migrations
-docker-compose exec web python manage.py migrate
-
-# Create superuser
-docker-compose exec web python manage.py createsuperuser
 ```
 
 ## API Reference

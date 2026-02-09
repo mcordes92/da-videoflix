@@ -32,11 +32,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Passwords do not match')
         return value
 
+
     def validate_email(self, value):
         """Validate that the email is unique."""
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError('Email already exists')
         return value
+
 
     def save(self):
         """Create and save a new user with hashed password."""
@@ -79,10 +81,12 @@ class LoginSerializer(serializers.Serializer):
         attrs["user"] = user
         return attrs
     
+
 class PasswordResetSerializer(serializers.Serializer):
     """Serializer for requesting a password reset."""
     
     email = serializers.EmailField()
+
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
     """Serializer for confirming a password reset with new password."""

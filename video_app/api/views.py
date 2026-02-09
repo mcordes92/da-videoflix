@@ -25,6 +25,7 @@ class VideoListView(ListAPIView):
         ctx["request"] = self.request
         return ctx
     
+
 class VideoHlsPlaylistView(APIView):
     """Serve HLS playlist files for video streaming."""
     
@@ -44,6 +45,7 @@ class VideoHlsPlaylistView(APIView):
         response = FileResponse(open(playlist_path, 'rb'), content_type='application/vnd.apple.mpegurl')
         response["Content-Disposition"] = "inline; filename=index.m3u8"
         return response
+    
     
 class VideoHlsSegmentView(APIView):
     """Serve HLS video segments for streaming."""

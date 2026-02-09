@@ -14,6 +14,7 @@ HLS_VARIANTS = [
     {"name": "1080p", "height": 1080, "v_bitrate": "5000k", "maxrate": "5350k", "bufsize": "7500k", "bandwidth": 5800000},
 ]
 
+
 def process_video_to_hls(video_id: int):
     """
     Verarbeitet Video sequentiell: eine Variante nach der anderen
@@ -123,9 +124,14 @@ def run_ffmpeg(cmd: list):
     if p.returncode != 0:
         raise RuntimeError(f"ffmpeg failed: (code {p.returncode}) {p.stderr}")
     
-def generate_thumbnail_for_video(video: Video, input_path: Path):
+
+def generate_thumbnail_for_video(video: Video, input_path: Path = None):
     if video.thumbnail:
         return
+    
+    # Wenn kein input_path angegeben, hole es vom Video-Objekt
+    if input_path is None:
+        input_path = Path(video.video_file.path)
     
     thumbnails_dir = Path(getattr(settings, 'MEDIA_ROOT')) / 'thumbnails'
     thumbnails_dir.mkdir(parents=True, exist_ok=True)

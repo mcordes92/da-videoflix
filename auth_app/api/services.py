@@ -149,6 +149,7 @@ def create_password_reset(user: User):
     queue = django_rq.get_queue('high', autocommit=True)
     queue.enqueue(send_password_reset_email, user, obj.token, uidb64)
 
+
 def confirm_password_reset(uidb64: str, token: str, new_password: str):
     try:
         user_data = UserTokenModel.objects.select_related("user").get(uidb64=uidb64, token=token)

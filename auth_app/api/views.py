@@ -36,6 +36,7 @@ class RegistrationView(views.APIView):
                 }, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
 class ActivationView(views.APIView):
     """Handle user account activation via email link."""
     
@@ -49,6 +50,7 @@ class ActivationView(views.APIView):
             return response.Response(data, status=status.HTTP_200_OK)
         except Exception:
             return response.Response({"message": "Activation failed."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class LoginView(views.APIView):
     """Handle user login and JWT token generation."""
@@ -84,6 +86,7 @@ class LoginView(views.APIView):
         set_auth_cookies(res, access_token, refresh_token)
         return res
     
+
 class LogoutView(views.APIView):
     """Handle user logout and token invalidation."""
     
@@ -117,6 +120,7 @@ class LogoutView(views.APIView):
         clear_auth_cookies(res)
         return res
     
+
 class TokenRefreshView(views.APIView):
     """Handle JWT access token refresh."""
     
@@ -153,6 +157,7 @@ class TokenRefreshView(views.APIView):
         set_access_token(res, new_access)
         return res
     
+
 class PasswordResetView(views.APIView):
     """Handle password reset request."""
     
@@ -179,6 +184,7 @@ class PasswordResetView(views.APIView):
             {"detail": "An email has been sent to reset your password."},
             status=status.HTTP_200_OK
         )
+    
     
 class PasswordResetConfirmView(views.APIView):
     """Handle password reset confirmation."""

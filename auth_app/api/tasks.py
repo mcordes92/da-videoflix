@@ -42,6 +42,7 @@ def send_welcome_email(to_email: str, token: str, uidb64: str) -> None:
         fail_silently=False,
     )
 
+
 def send_password_reset_email(user: User, token: str, uidb64: str):
     subject = "Reset your password"
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(settings, "EMAIL_HOST_USER", None)
