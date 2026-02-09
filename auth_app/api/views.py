@@ -68,6 +68,11 @@ class LoginView(views.APIView):
             status=status.HTTP_200_OK
         )
 
+        # Verhindere Browser-Caching von Auth-Responses
+        res["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+        res["Pragma"] = "no-cache"
+        res["Expires"] = "0"
+
         set_auth_cookies(res, access_token, refresh_token)
         return res
     
@@ -92,6 +97,11 @@ class LogoutView(views.APIView):
             {"detail": "Logout successful! All tokens will be deleted."},
             status=status.HTTP_200_OK
         )
+
+        # Verhindere Browser-Caching von Auth-Responses
+        res["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+        res["Pragma"] = "no-cache"
+        res["Expires"] = "0"
 
         clear_auth_cookies(res)
         return res
@@ -118,6 +128,11 @@ class TokenRefreshView(views.APIView):
             },
             status=status.HTTP_200_OK
         )
+
+        # Verhindere Browser-Caching von Auth-Responses
+        res["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+        res["Pragma"] = "no-cache"
+        res["Expires"] = "0"
 
         set_access_token(res, new_access)
         return res

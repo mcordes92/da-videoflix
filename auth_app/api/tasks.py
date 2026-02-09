@@ -47,21 +47,22 @@ def send_password_reset_email(user: User, token: str, uidb64: str):
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(settings, "EMAIL_HOST_USER", None)
 
     base_url = getattr(settings, "FRONTEND_ACTIVATE_URL", None) or "http://127.0.0.1:5500/pages/auth/confirm_password.html"
-    reset_url = f"{base_url}?uid={uidb64}&token={token}"
-
-    text = f"Reset your password using this link:\n{reset_url}"
+    query = urlencode({"uid": uidb64, "token": token})
+    reset_url = f"{base_url}?{query}"
 
     html = render_to_string(
-        "verify_email.html",
+        "password_reset_email.html",
         {
             "subject": subject,
-            "preheader": "Please verify your email address to activate your account.",
+            "preheader": "You requested to reset your password. Click the link to reset it.",
             "app_name": getattr(settings, "APP_NAME", None) or "Videoflix",
             "logo_url": getattr(settings, "EMAIL_LOGO_URL", None),
-            "verify_url": reset_url,
+            "reset_url": reset_url,
             "year": getattr(settings, "EMAIL_YEAR", None),
         },
     )
+
+    text = strip_tags(html)
 
     send_mail(
         subject=subject,

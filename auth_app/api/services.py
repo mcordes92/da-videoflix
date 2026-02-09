@@ -45,31 +45,34 @@ def set_auth_cookies(res, access_token: str, refresh_token: str):
 
     secure = bool(getattr(settings, "AUTH_COOKIE_SECURE", False))
     samesite = getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax")
+    domain = getattr(settings, "AUTH_COOKIE_DOMAIN", None)
 
     access_max_age = int(getattr(settings, "AUTH_ACCESS_COOKIE_MAX_AGE", 60 * 15))
     refresh_max_age = int(getattr(settings, "AUTH_REFRESH_COOKIE_MAX_AGE", 60 * 60 * 24 * 7))
+
+    cookie_kwargs = {
+        "httponly": True,
+        "secure": secure,
+        "samesite": samesite,
+        "path": "/"
+    }
+    
+    if domain:
+        cookie_kwargs["domain"] = domain
 
     res.set_cookie(
         access_cookie,
         access_token,
         max_age=access_max_age,
-        httponly=True,
-        secure=secure,
-        samesite=samesite,
-        path="/"
+        **cookie_kwargs
     )
 
     res.set_cookie(
         refresh_cookie,
         refresh_token,
         max_age=refresh_max_age,
-        httponly=True,
-        secure=secure,
-        samesite=samesite,
-        path="/"
+        **cookie_kwargs
     )
-
-    print(f"Set cookies: {access_cookie} (max_age={access_max_age}), {refresh_cookie} (max_age={refresh_max_age})")
 
     return res
 
@@ -77,11 +80,20 @@ def set_auth_cookies(res, access_token: str, refresh_token: str):
 def clear_auth_cookies(res):
     access_cookie = getattr(settings, "AUTH_ACCESS_COOKIE_NAME", "access_token")
     refresh_cookie = getattr(settings, "AUTH_REFRESH_COOKIE_NAME", "refresh_token")
+    
+    samesite = getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax")
+    domain = getattr(settings, "AUTH_COOKIE_DOMAIN", None)
 
-    res.delete_cookie(access_cookie, path="/")
-    res.delete_cookie(refresh_cookie, path="/")
+    delete_kwargs = {
+        "path": "/",
+        "samesite": samesite
+    }
+    
+    if domain:
+        delete_kwargs["domain"] = domain
 
-    print(f"Cleared cookies: {access_cookie}, {refresh_cookie}")
+    res.delete_cookie(access_cookie, **delete_kwargs)
+    res.delete_cookie(refresh_cookie, **delete_kwargs)
 
     return res
 
@@ -101,17 +113,25 @@ def set_access_token(res, access_token: str):
 
     secure = bool(getattr(settings, "AUTH_COOKIE_SECURE", False))
     samesite = getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax")
+    domain = getattr(settings, "AUTH_COOKIE_DOMAIN", None)
 
     access_max_age = int(getattr(settings, "AUTH_ACCESS_COOKIE_MAX_AGE", 60 * 15))
+
+    cookie_kwargs = {
+        "httponly": True,
+        "secure": secure,
+        "samesite": samesite,
+        "path": "/"
+    }
+    
+    if domain:
+        cookie_kwargs["domain"] = domain
 
     res.set_cookie(
         access_cookie,
         access_token,
         max_age=access_max_age,
-        httponly=True,
-        secure=secure,
-        samesite=samesite,
-        path="/"
+        **cookie_kwargs
     )
 
     return res
