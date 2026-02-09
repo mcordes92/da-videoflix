@@ -1,3 +1,4 @@
+"""URL configuration for video API endpoints."""
 from django.urls import path
 from .views import VideoListView, VideoHlsPlaylistView, VideoHlsSegmentView
 

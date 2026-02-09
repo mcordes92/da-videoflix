@@ -37,9 +37,12 @@ class RegistrationView(views.APIView):
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class ActivationView(views.APIView):
+    """Handle user account activation via email link."""
+    
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, uidb64, token):
+        """Activate user account using uidb64 and token."""
         try:
             msg = active_account(uidb64=uidb64, token=token)
             data = {"message": msg}
@@ -48,9 +51,15 @@ class ActivationView(views.APIView):
             return response.Response({"message": "Activation failed."}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(views.APIView):
+    """Handle user login and JWT token generation."""
+    
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        """Authenticate user and return JWT tokens via cookies.
+        
+        Prevents browser caching of authentication responses.
+        """
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -68,7 +77,6 @@ class LoginView(views.APIView):
             status=status.HTTP_200_OK
         )
 
-        # Verhindere Browser-Caching von Auth-Responses
         res["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
         res["Pragma"] = "no-cache"
         res["Expires"] = "0"
@@ -77,28 +85,31 @@ class LoginView(views.APIView):
         return res
     
 class LogoutView(views.APIView):
+    """Handle user logout and token invalidation."""
+    
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        """Logout user by blacklisting refresh token and clearing cookies.
+        
+        Attempts to blacklist the refresh token if present.
+        Clears authentication cookies regardless of token presence.
+        Prevents browser caching of authentication responses.
+        """
         refresh_cookie = getattr(settings, "AUTH_REFRESH_COOKIE_NAME", "refresh_token")
         refresh_token = request.COOKIES.get(refresh_cookie)
 
-        print("Logout requested. Refresh token:", refresh_token)
-
-        # Versuche refresh token zu blacklisten (wenn vorhanden)
         if refresh_token:
             try:
                 blacklist_refresh_token(refresh_token)
             except Exception:
                 pass
 
-        # Lösche Cookies IMMER, auch wenn kein refresh_token vorhanden war
         res = response.Response(
             {"detail": "Logout successful! All tokens will be deleted."},
             status=status.HTTP_200_OK
         )
 
-        # Verhindere Browser-Caching von Auth-Responses
         res["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
         res["Pragma"] = "no-cache"
         res["Expires"] = "0"
@@ -107,9 +118,15 @@ class LogoutView(views.APIView):
         return res
     
 class TokenRefreshView(views.APIView):
+    """Handle JWT access token refresh."""
+    
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        """Generate new access token from refresh token.
+        
+        Prevents browser caching of authentication responses.
+        """
         refresh_cookie = getattr(settings, "AUTH_REFRESH_COOKIE_NAME", "refresh_token")
         refresh_token = request.COOKIES.get(refresh_cookie)
 
@@ -129,7 +146,6 @@ class TokenRefreshView(views.APIView):
             status=status.HTTP_200_OK
         )
 
-        # Verhindere Browser-Caching von Auth-Responses
         res["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
         res["Pragma"] = "no-cache"
         res["Expires"] = "0"
@@ -138,9 +154,12 @@ class TokenRefreshView(views.APIView):
         return res
     
 class PasswordResetView(views.APIView):
+    """Handle password reset request."""
+    
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        """Send password reset email to user."""
         serializer = PasswordResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -162,9 +181,12 @@ class PasswordResetView(views.APIView):
         )
     
 class PasswordResetConfirmView(views.APIView):
+    """Handle password reset confirmation."""
+    
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, uidb64, token):
+        """Confirm password reset with new password."""
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

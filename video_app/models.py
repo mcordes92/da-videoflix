@@ -1,6 +1,9 @@
+"""Models for video content management."""
 from django.db import models
 
 class Video(models.Model):
+    """Model representing a video with metadata and file references."""
+    
     title = models.CharField(max_length=255)
     description = models.TextField()
     video_file = models.FileField(upload_to='videos/')

@@ -58,10 +58,13 @@ class ActivationResponseSerializer(serializers.Serializer):
 
 
 class LoginSerializer(serializers.Serializer):
+    """Serializer for user login with email and password."""
+    
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
+        """Validate user credentials and account activation status."""
         email = attrs.get('email')
         password = attrs.get('password')
 
@@ -77,13 +80,18 @@ class LoginSerializer(serializers.Serializer):
         return attrs
     
 class PasswordResetSerializer(serializers.Serializer):
+    """Serializer for requesting a password reset."""
+    
     email = serializers.EmailField()
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer for confirming a password reset with new password."""
+    
     new_password = serializers.CharField()
     confirm_password = serializers.CharField()
 
     def validate(self, data):
+        """Validate that new password and confirm password match."""
         if data["new_password"] != data["confirm_password"]:
             raise serializers.ValidationError("Passwords do not match.")
         return data
