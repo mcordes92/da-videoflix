@@ -54,32 +54,34 @@ cd da-videoflix
 Create a `.env` file in the project root or copy the `.env.template`:
 
 ```env
-# Django
-SECRET_KEY=your-secret-key-here
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_PASSWORD=adminpassword
+DJANGO_SUPERUSER_EMAIL=admin@example.com
+
+SECRET_KEY="your_secret_key_here"
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
-CSRF_TRUSTED_ORIGINS=http://localhost:4200
+CSRF_TRUSTED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500
 
-# Database
-DB_NAME=videoflix_db
-DB_USER=videoflix_user
-DB_PASSWORD=supersecretpassword
-DB_HOST=localhost
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_HOST=db
 DB_PORT=5432
 
-# Redis
-REDIS_HOST=localhost
+REDIS_HOST=redis
+REDIS_LOCATION=redis://redis:6379/1
 REDIS_PORT=6379
 REDIS_DB=0
-REDIS_LOCATION=redis://localhost:6379/1
 
-# Email (SMTP)
-EMAIL_HOST=smtp.gmail.com
+EMAIL_HOST=smtp.example.com
 EMAIL_PORT=587
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-password
+EMAIL_HOST_USER=your_email_user
+EMAIL_HOST_PASSWORD=your_email_user_password
 EMAIL_USE_TLS=True
-DEFAULT_FROM_EMAIL=your-email@gmail.com
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL=default_from_email
+
 ```
 
 ### Docker Setup
